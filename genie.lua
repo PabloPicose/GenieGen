@@ -1,4 +1,5 @@
 --mirar https://www.lua.org/pil/16.1.html
+--copiar a mi repo https://github.com/TesterPointer/TraceSystem
 dofile("src/GenPath.lua")
 
 --eleinputdata_path = GenPath
