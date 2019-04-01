@@ -14,48 +14,62 @@ GenFile = {
     has_been_checked_qobject = false,
 }
 
+GenFile.__index = GenFile
+
+setmetatable(GenFile, {
+    __call = function (cls, ...)
+      return cls.new(...)
+    end,
+  })
+
+function GenFile.new()
+    local self = setmetatable({}, GenFile)
+    return self
+end
+
+
 --Initialize the GenFile. Checks if file exists
 --[_path] Full path with the name and the extension of a file 
-function GenFile.Init(_self, _path)
+function GenFile:Init( _path)
     if not os.isfile(_path) then 
         print("WARNING GenFile not exist: ".._path)
         return 
     end
-    _self.full_path_str = _path
-    GenFile.ConvertPathToWindows(_self)
-    _self.name_str = path.getbasename(_self.full_path_str)
-    _self.extension_str = path.getextension(_self.full_path_str)
-    _self.name_extension_str = path.getname(_self.full_path_str)
-    _self.path_str = path.getdirectory(_self.full_path_str)
-    _self.is_initialized = true
+    self.full_path_str = _path
+    self:ConvertPathToWindows()
+    self.name_str = path.getbasename(self.full_path_str)
+    self.extension_str = path.getextension(self.full_path_str)
+    self.name_extension_str = path.getname(self.full_path_str)
+    self.path_str = path.getdirectory(self.full_path_str)
+    self.is_initialized = true
 end
 
 --Checks if the file has a Q_OBJECT macro. Multiple calls will be omited
 --[RETURNS] True if has Q_OBJECT macro otherwise false
-function GenFile.CheckQObject(_self)
+function GenFile:CheckQObject()
     --print("Q_OBJECT: ".._self.full_path_str)
-    if not _self.is_initialized then return false end
-    if _self.has_been_checked_qobject then return is_qobject end
-    _self.has_been_checked_qobject = true
-    if not _self.name_extension_str == ".h" or
-        not _self.name_extension_str == ".hh" or
-        not _self.name_extension_str == ".hpp" then return false end
-    local _lines = GenFile.GetLines(_self)
+    if not self.is_initialized then return false end
+    if self.has_been_checked_qobject then return is_qobject end
+    self.has_been_checked_qobject = true
+    if not self.name_extension_str == ".h" or
+        not self.name_extension_str == ".hh" or
+        not self.name_extension_str == ".hpp" then return false end
+    local _lines = GenFile.GetLines(self)
     for _, v in pairs(_lines) do
         if string.match(' '..v..' ', '%W'.."Q_OBJECT"..'%W') ~= nil then 
-            _self.is_qobject = true
+            self.is_qobject = true
             break
         end
     end
-    return _self.is_qobject
+    return self.is_qobject
 end
 
 -- Reads file and get the lines. This not modify the GenFile
 --[RETURNS] Array lines from file, can be empty
-function GenFile.GetLines(_self)
-    if not _self.is_initialized then return {} end
+function GenFile:GetLines()
+    if not self.is_initialized then return {} end
     lines = {}
-    for line in io.lines(_self.full_path_str) do 
+    for line in io.lines(self.full_path_str) do 
       lines[#lines + 1] = line
     end
     return lines
@@ -74,15 +88,15 @@ function CleanStartSpacesFromLine(file_line)
     return file_line:sub(_start_index, #file_line)
 end
 
-function GenFile.ConvertPathToWindows(_self)
+function GenFile:ConvertPathToWindows()
     local output_str =""
     
-    for i = 1, string.len(_self.full_path_str) do
-        if (string.sub(_self.full_path_str, i, i) == "/")then
+    for i = 1, string.len(self.full_path_str) do
+        if (string.sub(self.full_path_str, i, i) == "/")then
             output_str = output_str.."\\"
         else
-            output_str = output_str..string.sub(_self.full_path_str, i, i)
+            output_str = output_str..string.sub(self.full_path_str, i, i)
         end
     end
-    _self.full_path_str = output_str
+    self.full_path_str = output_str
 end
