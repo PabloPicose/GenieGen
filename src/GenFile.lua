@@ -1,3 +1,4 @@
+local genfile = {}
 --All the GenFile functions receive "self" as argument to determine
 --the variable that will be treated
 GenFile = {
@@ -100,3 +101,5 @@ function GenFile:ConvertPathToWindows()
     end
     self.full_path_str = output_str
 end
+
+return genfile

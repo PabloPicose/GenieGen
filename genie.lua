@@ -1,25 +1,27 @@
 --mirar https://www.lua.org/pil/16.1.html
 --copiar a mi repo https://github.com/TesterPointer/TraceSystem
-dofile("src/GenGlobal.lua")
+--mirar https://blog.qt.io/blog/2018/01/24/qt-visual-studio-new-approach-based-msbuild/
+require "src/genglobal"
 
-eleinputdata_path = GenPath.new()
-eleinputdata_path:Init("C:/workcopy/ForanDesa/srcoo/foranfw/elebase")
+--eleinputdata_path = GenPath.new()
+--eleinputdata_path:Init("C:/workcopy/ForanDesa/srcoo/foranfw/elebase/eleinputdata")
+--print(eleinputdata_path:GetNumberOfFiles())
+--eleinputdata_path:GetName()
+--eleinputdata_path:ScanRecursively()
 --GenPath.PrintFiles(eleinputdata_path)
-eleinputdata_path:ProcessQTObject()
+--eleinputdata_path:ProcessQTObject()
 
+GenieGenScan("C:/workcopy/ForanDesa/srcoo/foranfw/elebase/eleinputdata")--buscar carpetas que sea eleinputdata/genie/eleinputdata.lua
 
-function SanDirectory(directory)
-    local i, t, popen = 0, {}, io.popen
-    local pfile = popen('dir "'..directory..'" /b /ad')
-    for filename in pfile:lines() do
-        i = i + 1
-        t[i] = filename
-    end
-    pfile:close()
-    return t
-end
+--[[PROTOTYPES]]
+--Plantilla de configuracion
+--comprobar unas funciones
+--project_definition_eleinputdata()--static lib, language, configuration
+--funcion que devuelve los modulos de qt a incluir igual que en QMake
+--core, gui, multimedia, network, qml, sql 
+--project_qt_eleinputdata()
+--en el .lua
 
-for _, folder in pairs ( SanDirectory("C:\\workcopy\\ForanDesa\\srcoo") ) do 
-    print(folder)
-end
+--GenGenieProject()
+
 solution "PEpe"
