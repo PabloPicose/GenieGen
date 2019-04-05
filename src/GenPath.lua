@@ -29,17 +29,20 @@ end
 
 --Initializes the GenPath
 --[path] Full path of the directory
-function GenPath:Init(_path)
+--[scan_recursively] Determine if it should scan the subfolders at the initialization. FALSE DEFAULT
+function GenPath:Init(_path, --[[Optional]] _scan_recursively)
     if not os.isdir(_path) then
         print("WARNING: GenPath does not exist: ".._path)
          return 
     end
+    _scan_recursively = _scan_recursively or false
+
     self.is_initialized = true
     self.path_str = _path
     self:ConvertPathToWindows()
     self.path_name_str = self:GetName()
     self.has_genie_folder = self:HasFileName("genie/"..self.path_name_str..".lua")
-    print("Init GenPath: "..self.path_str)
+    --print("Init GenPath: "..self.path_str)
     local files_str = self:GetFiles()
     for _, file in pairs(files_str) do 
         local _fullpath_file = path.join(self.path_str,file)
@@ -51,19 +54,31 @@ function GenPath:Init(_path)
             table.insert( self.files_arr, new_file )
         end
     end
+    if _scan_recursively then
+        self:ScanRecursively(_scan_recursively)
+    end
 end
 
-function GenPath:ScanRecursively()
+--[scan_recursively] Determine if it should scan the subfolders at the initialization. FALSE DEFAULT
+function GenPath:ScanRecursively(--[[Optional]] _scan_recursively)
     if not self.is_initialized then 
         print("WARNING: Path not initialized")
         return 
     end
     if self.is_scan_recursively then return end
     self.is_scan_recursively = true
+    if(#self:GetFolders() == 0) then 
+        --print("Dir without folder: "..self.path_str)
+        return
+    end
+    print("Scaning")
     for _, folder in pairs(self:GetFolders()) do 
         local _fullpath = path.join(self.path_str, folder)
         local _sub_folder = GenPath.new()
-        _sub_folder:Init(_fullpath)
+        _sub_folder:Init(_fullpath, true)
+        --print(_sub_folder.path_str)
+        _sub_folder:PrintSubfolders()
+        table.insert(self.subfolders_arr, _sub_folder)
     end
     
 end
@@ -110,14 +125,8 @@ function GenPath:GetFiles()
 end
 
 function GenPath:GetFolders()
-    local i, t, popen = 0, {}, io.popen
-    local pfile = popen('dir "'..self.path_str..'" /b /ad')
-    for filename in pfile:lines() do
-        i = i + 1
-        t[i] = filename
-    end
-    pfile:close()
-    return t
+    print("Getting folders in: "..self.path_str)
+    return os.matchdirs(self.path_str.."/*")
 end
 
 --Process all the files in the path and check files with Q_OBJECT macro
@@ -146,6 +155,16 @@ function GenPath:PrintQObjectFiles()
     print("Q_OBJECTS in: "..self.path_str)
     for _, gen_file in pairs(self.qobjects_file_arr) do 
         print(gen_file.full_path_str)
+    end
+end
+
+function GenPath:PrintSubfolders()
+    if not self.is_initialized or #self.subfolders_arr == 0 then 
+        return
+    end
+    print("Subfolders in: "..self.path_str)
+    for _, k in pairs(self.subfolders_arr) do 
+        print("Sub: "..k.path_str)
     end
 end
 
@@ -183,6 +202,5 @@ function GenPath:HasFileName(_file_name)
     local _suposed_file = path.join(self.path_str, _file_name)
     return os.isfile(_suposed_file)
 end
-
 
 return genpath

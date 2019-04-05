@@ -36,6 +36,7 @@ function GenFile:Init( _path)
         print("WARNING GenFile not exist: ".._path)
         return 
     end
+
     self.full_path_str = _path
     self:ConvertPathToWindows()
     self.name_str = path.getbasename(self.full_path_str)
