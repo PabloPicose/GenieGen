@@ -9,7 +9,7 @@ newoption {
 require("GenieGen")
 
 GenieGenScan("C:/workcopy/ForanDesa")--buscar carpetas que sea eleinputdata/genie/eleinputdata.lua
-GenieGenStartSolution(_OPTIONS["startproject"])
+GenieGenStartSolution()
 --local customProjectDirs = _OPTIONS["startproject"]
 --local START_PROJECT = GenieGenFindProject(customProjectDirs)
 
