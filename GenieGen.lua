@@ -1,8 +1,11 @@
+require("GenieGenDefaultProjects")
 local GenieGen = {}
 
 
 local GENIE_PATHS = {}
 local dict_name_path = {}
+local default_projecs_loaded = {}
+
 
 function GetPathName(_path)
     local _output = "unknown name"
@@ -41,6 +44,10 @@ function GenieGenScan(_path)
         if HasGeniePath(fold) then
             table.insert( GENIE_PATHS, fold)
             dict_name_path[GetPathName(fold)] = fold
+
+        elseif table.contains(default_projecs_id, GetPathName(fold)) then
+            local _default_project_name =  GetPathName(fold)
+            print("Default proyect founded: ")
         end
     end
 
@@ -63,18 +70,53 @@ function GenieGenFindProject(_name)
     return _error
 end
 
-function GenieGenLoadProject(_name)
+function GenieGenLoadProject(_name, _qt_project)
+    _qt_project = _qt_project or false
     --loads the file 
     print("Loading project: ".._name)
     --call for the existence function
+    --project, kind, language
     local projec_name_type = "GenieGen_base_".._name
+    -- files
     local src_need = "GenieGen_files_".._name
-    local inc_need = "GenieGen_includedirs_"..name
-    local links_need = "GenieGen_links_"..name
-    local aditional_need = "GenieGen_aditional_config_"..name
+    -- includedirs
+    local inc_need = "GenieGen_includedirs_".._name
+    -- links
+    local links_need = "GenieGen_links_".._name
+    -- all the optional configurations like defines
+    local aditional_need = "GenieGen_aditional_config_".._name
 
-    _G[x]() -- calls foo from the global namespace
-    if _G[x]()~=nil then foo() end
+    -- Check for the needed functions before call
+    local _errors_tbl = {}
+    if _G[projec_name_type]==nil then 
+        table.insert( _errors_tbl, projec_name_type.."()")
+    end
+    if _G[src_need]==nil then 
+        table.insert( _errors_tbl, "[Table with files output]: "..src_need.."(_absolute_proyect_path)")
+    end
+    -- print errors
+    if #_errors_tbl ~= 0 then 
+        print("Error: Trying to load an incomplete project (needed functions) from: ".._name)
+        for _, err in pairs(_errors_tbl) do 
+            print("\t"..err)
+        end
+        os.exit()
+    end
+
+    -- Call the needed functions
+    _G[projec_name_type]()
+    local file_project = _G[src_need]()
+
+    -- Call the optional functions
+    if _G[links_need]~=nil then 
+        links_project = _G[links_need]()
+    end
+    if _G[links_need]~=nil then 
+        _G[links_need]()
+    end
+    if _G[aditional_need]~=nil then 
+        _G[aditional_need]()
+    end
 end
 
 function GenieGenStartSolution()
@@ -85,7 +127,7 @@ function GenieGenStartSolution()
         for n, k in pairs(GENIE_PATHS) do 
             print([[            ]].."("..tostring(n)..")"..GetPathName(k))
         end
-        return false
+        os.exit()
     end
     local START_PROJECT = GenieGenFindProject(customProjectDirs)
     if(not START_PROJECT) then 
@@ -95,7 +137,7 @@ function GenieGenStartSolution()
         for n, k in pairs(GENIE_PATHS) do 
             print([[            ]].."("..tostring(n)..")"..GetPathName(k))
         end
-        return false
+        os.exit()
     end
     print("Defined started project in: "..START_PROJECT)
     -- Loads the start project
